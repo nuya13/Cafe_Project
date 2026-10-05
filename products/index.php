@@ -28,7 +28,7 @@ $products =$stmt->fetchAll();
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar ซ้ายตามแบบภาพเป๊ะๆ -->
+        <!-- Sidebar ซ้าย -->
         <aside class="col-md-3 col-lg-2 sidebar p-4 d-flex flex-column justify-content-between">
             <div>
                 <div class="brand-title mb-4 d-flex align-items-center gap-2">
@@ -45,7 +45,7 @@ $products =$stmt->fetchAll();
                 </div>
             </div>
 
-            <!-- กล่องข้อมูลผู้ใช้และปุ่ม Logout ด้านล่าง -->
+            <!-- กล่องข้อมูลผู้ใช้และปุ่ม Logout -->
             <div class="pt-3 border-top" style="border-color: var(--cafe-border) !important;">
                 <div class="small fw-bold text-truncate"><?= htmlspecialchars($_SESSION['fullname']); ?></div>
                 <div class="badge bg-secondary mb-2"><?= htmlspecialchars($_SESSION['role']); ?></div>
@@ -58,7 +58,7 @@ $products =$stmt->fetchAll();
         <!-- Main Content ขวามือ -->
         <main class="col-md-9 col-lg-10 p-4 p-md-5">
 
-            <!-- แถบค้นหาด้านบน -->
+            <!-- แถบค้นหาด้านบน & ปุ่ม Add Menu -->
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
                 <div class="flex-grow-1" style="max-width: 450px;">
                     <div class="input-group">
@@ -69,15 +69,15 @@ $products =$stmt->fetchAll();
                     </div>
                 </div>
 
-                <a href="create.php" class="btn btn-warning text-white fw-bold px-4 py-2 rounded-pill shadow-sm" style="background-color: var(--cafe-primary); border: none;">
+                <a href="create.php" class="btn text-white px-4 py-2 rounded-pill shadow-sm" style="background-color: var(--cafe-primary); border: none; font-weight: 500;">
                     <i class="bi bi-plus-lg me-1"></i> Add Menu
                 </a>
             </div>
 
-            <!-- หัวข้อหน้าและปุ่มหมวดหมู่ (Category Pills) -->
-            <h2 class="fw-bold mb-3">Coffee menu</h2>
-            <p class="text-muted mb-4">Manage your menu, check stock levels, and update each item quickly from one simple dashboard.</p>
+            <h2 class="fw-normal mb-1">Coffee menu</h2>
+            <p class="text-muted small mb-4">Manage your menu, check stock levels, and update each item quickly from one simple dashboard.</p>
 
+            <!-- แถบปุ่มหมวดหมู่ (Category Pills) -->
             <div class="d-flex flex-wrap gap-2 mb-4" id="categoryPills">
                 <button type="button" class="category-pill active" data-category="">All</button>
                 <?php foreach ($categories as$cat): ?>
@@ -87,48 +87,46 @@ $products =$stmt->fetchAll();
                 <?php endforeach; ?>
             </div>
 
-            <!-- Grid แสดงการ์ดสินค้า -->
+            <!-- กล่องสินค้า -->
             <div class="row g-4" id="productGrid">
-    <?php if (count($products) > 0): ?>
-        <?php foreach ($products as $p): ?>
-            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 product-item" 
-                 data-name="<?= strtolower(htmlspecialchars($p['name'])); ?>" 
-                 data-category="<?= strtolower(htmlspecialchars($p['category_name'] ?? '')); ?>">
-                
-                <div class="card product-card shadow-sm p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="fw-bold mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
-                        <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
-                    </div>
+                <?php if (count($products) > 0): ?>
+                    <?php foreach ($products as$p): ?>
+                        <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 product-item" 
+                             data-name="<?= htmlspecialchars($p['name']); ?>" 
+                             data-category="<?= htmlspecialchars($p['category_name'] ?? ''); ?>">
+                            
+                            <div class="card product-card shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="fw-normal mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
+                                        <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
+                                    </div>
+                                    <div class="text-muted small mb-3">
+                                        Category: <span class="badge bg-light text-dark border"><?= htmlspecialchars($p['category_name'] ?? 'General'); ?></span>
+                                    </div>
+                                </div>
 
-                    <div class="text-muted small mb-3">
-                        Category: <span class="badge bg-light text-dark border"><?= htmlspecialchars($p['category_name'] ?? 'ทั่วไป'); ?></span>
-                    </div>
+                                <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                                    <small class="text-muted">
+                                        Stock: <span><?= $p['stock']; ?></span>
+                                    </small>
+                                    <div class="btn-group">
+                                        <a href="edit.php?id=<?= $p['id']; ?>" class="btn btn-outline-secondary btn-sm rounded-start-pill px-3" style="font-size: 0.85rem;">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <button onclick="confirmDelete(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>')" class="btn btn-outline-danger btn-sm rounded-end-pill px-2" style="font-size: 0.85rem;">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
-                        <small class="text-muted">
-                            Stock: <b><?= $p['stock']; ?></b>
-                        </small>
-                        <div class="btn-group">
-                            <a href="edit.php?id=<?= $p['id']; ?>" class="btn btn-outline-secondary btn-sm btn-cafe-action">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <button onclick="confirmDelete(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>')" class="btn btn-outline-danger btn-sm btn-cafe-action">
-                                <i class="bi bi-trash"></i>
-                            </button>
                         </div>
-                    </div>
-                </div>
-
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-12 text-center py-5 text-muted">ยังไม่มีรายการสินค้า</div>
+                <?php endif; ?>
             </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <div class="col-12 text-center py-5 text-muted">
-            <div class="fw-medium">Do not have any products</div>
-            <small class="d-block mt-2">Please add a new menu to start managing your food and beverage items</small>
-        </div>
-    <?php endif; ?>
-</div>
 
         </main>
     </div>
@@ -138,38 +136,44 @@ $products =$stmt->fetchAll();
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// Filter & Search ทำงานร่วมกันแบบ Real-time
+// ตัวกรองหมวดหมู่และค้นหา Real-time
 const searchInput = document.getElementById('searchInput');
 const categoryPills = document.querySelectorAll('.category-pill');
 const productItems = document.querySelectorAll('.product-item');
 let activeCategory = '';
 
 function runFilter() {
-    const searchTerm = searchInput.value.toLowerCase().trim();
+    const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
     productItems.forEach(item => {
-        const name = item.getAttribute('data-name');
-        const category = item.getAttribute('data-category');
+        const name = (item.getAttribute('data-name') || '').toLowerCase().trim();
+        const category = (item.getAttribute('data-category') || '').toLowerCase().trim();
 
+        // ตรวจสอบชื่อสินค้า
         const matchName = name.includes(searchTerm);
-        const matchCategory = (activeCategory === '') || category.includes(activeCategory);
+
+        // ตรวจสอบหมวดหมู่ (ใช้ === เทียบแบบตรงตัว 100%)
+        const matchCategory = (activeCategory === '') || (category === activeCategory);
 
         if (matchName && matchCategory) {
-            item.style.display = '';
+            item.style.setProperty('display', 'block', 'important');
         } else {
-            item.style.display = 'none';
+            item.style.setProperty('display', 'none', 'important');
         }
     });
 }
 
-searchInput.addEventListener('input', runFilter);
+if (searchInput) {
+    searchInput.addEventListener('input', runFilter);
+}
 
-// กดสลับ Category Pill
+// สลับหมวดหมู่
 categoryPills.forEach(pill => {
-    pill.addEventListener('click', function() {
+    pill.addEventListener('click', function(e) {
+        e.preventDefault();
         categoryPills.forEach(p => p.classList.remove('active'));
         this.classList.add('active');
-        activeCategory = this.getAttribute('data-category').toLowerCase().trim();
+        activeCategory = (this.getAttribute('data-category') || '').toLowerCase().trim();
         runFilter();
     });
 });

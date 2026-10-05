@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'config/db.php';
 
 // ดึงหมวดหมู่
@@ -16,7 +17,7 @@ $products = $conn->query($sql)->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tomodachi Cafe - Digital Menu</title>
+    <title>Customer Menu - Tomodachi Café</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
@@ -26,11 +27,11 @@ $products = $conn->query($sql)->fetchAll();
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar สำหรับลูกค้า -->
+        <!-- Sidebar ด้านซ้าย -->
         <aside class="col-md-3 col-lg-2 sidebar p-4 d-flex flex-column justify-content-between">
             <div>
                 <div class="brand-title mb-4 d-flex align-items-center gap-2">
-                    <span>☕</span> Tomodachi Cafe
+                    <span>☕</span> Tomodachi Café
                 </div>
 
                 <div class="d-flex flex-column gap-2">
@@ -40,7 +41,7 @@ $products = $conn->query($sql)->fetchAll();
                 </div>
             </div>
 
-            <!-- ลิงก์สำหรับพนักงาน/ผู้จัดการเข้าระบบหลังบ้าน -->
+            <!-- ทางเข้าฝั่งพนักงาน -->
             <div class="pt-3 border-top" style="border-color: var(--cafe-border) !important;">
                 <a href="auth/login.php" class="nav-link-custom text-muted small px-0">
                     <i class="bi bi-shield-lock"></i> Staff Login
@@ -48,11 +49,11 @@ $products = $conn->query($sql)->fetchAll();
             </div>
         </aside>
 
-        <!-- โซนสั่งอาหารของลูกค้า -->
+        <!-- โซนสั่งอาหารหลัก -->
         <main class="col-md-9 col-lg-10 p-4 p-md-5">
 
-            <!-- แถบค้นหาด้านบน -->
-            <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+            <!-- แถบค้นหา และข้อมูลสมาชิก/ตะกร้าสินค้า (มีแถวเดียว ไม่ซ้ำ) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
                 <div class="flex-grow-1" style="max-width: 450px;">
                     <div class="input-group">
                         <span class="input-group-text bg-white border-0 rounded-start-pill ps-3 text-muted">
@@ -62,16 +63,36 @@ $products = $conn->query($sql)->fetchAll();
                     </div>
                 </div>
 
-                <!-- แสดงจำนวนชิ้นในตะกร้าจำลอง -->
-                <div class="badge bg-white text-dark border p-2 px-3 rounded-pill shadow-sm d-flex align-items-center gap-2">
-                    <i class="bi bi-cart3 text-warning fs-6" style="color: var(--cafe-primary) !important;"></i>
-                    <span>Your Cart: <b id="cartCount" class="text-danger">0</b> Menu Items</span>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- ตะกร้าสินค้า -->
+                    <div class="badge bg-white text-dark border p-2 px-3 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                        <i class="bi bi-cart3 fs-6" style="color: var(--cafe-primary) !important;"></i>
+                        <span>Cart: <b id="cartCount" class="text-danger">0</b></span>
+                    </div>
+
+                    <!-- สถานะลูกค้า -->
+                    <?php if (!empty($_SESSION['customer_name'])): ?>
+                        <div class="dropdown">
+                            <button class="btn btn-white bg-white border rounded-pill px-3 py-2 small shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                👋 สวัสดี, <?= htmlspecialchars($_SESSION['customer_name']); ?>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                <li><a class="dropdown-item text-danger small" href="customer_logout.php"><i class="bi bi-box-arrow-right me-2"></i>ออกจากระบบ</a></li>
+                            </ul>
+                        </div>
+                    <?php else: ?>
+                        <a href="customer_login.php" class="btn btn-outline-secondary rounded-pill px-3 py-2 small" style="font-weight: 500;">
+                            <i class="bi bi-person me-1"></i> เข้าสู่ระบบสมาชิก
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
 
-            <!-- หัวข้อและปุ่มหมวดหมู่ -->
-            <h2 class="fw-normal mb-3">Coffee menu</h2>
+            <!-- หัวข้อเมนู -->
+            <h2 class="fw-normal mb-1">Coffee menu</h2>
+            <p class="text-muted small mb-4">Select your favorite coffee, drinks, and bakery items.</p>
 
+            <!-- แถบปุ่มหมวดหมู่ (Pills) -->
             <div class="d-flex flex-wrap gap-2 mb-4" id="categoryPills">
                 <button type="button" class="category-pill active" data-category="">All</button>
                 <?php foreach ($categories as$cat): ?>
@@ -81,43 +102,43 @@ $products = $conn->query($sql)->fetchAll();
                 <?php endforeach; ?>
             </div>
 
-            <!-- การ์ดสินค้า (ไม่มีปุ่มแก้ไข/ลบ แต่มีปุ่มจำลองสั่งซื้อ) -->
+            <!-- กล่องแสดงรายการเมนู -->
             <div class="row g-4" id="productGrid">
-    <?php if (count($products) > 0): ?>
-        <?php foreach ($products as $p): ?>
-            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 product-item" 
-                 data-name="<?= htmlspecialchars($p['name']); ?>" 
-                 data-category="<?= htmlspecialchars($p['category_name'] ?? ''); ?>">
-                
-                <div class="card product-card shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
-                    <!-- ส่วนแสดงชื่อเมนูและราคา -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-normal mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
-                        <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
-                    </div>
+                <?php if (count($products) > 0): ?>
+                    <?php foreach ($products as$p): ?>
+                        <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 product-item" 
+                             data-name="<?= htmlspecialchars($p['name']); ?>" 
+                             data-category="<?= htmlspecialchars($p['category_name'] ?? ''); ?>">
+                            
+                            <div class="card product-card shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
+                                <!-- ชื่อเมนูและราคา (ฟอนต์บาง) -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-normal mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
+                                    <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
+                                </div>
 
-                    <!-- ส่วนปุ่มสั่งซื้อ หรือ แสดง Sold Out -->
-                    <div class="mt-auto pt-2">
-                        <?php if ($p['stock'] > 0): ?>
-                            <button onclick="addToCart('<?= htmlspecialchars($p['name']); ?>', <?= $p['price']; ?>)" 
-                                    class="btn w-100 text-white rounded-pill py-2 shadow-sm" 
-                                    style="background-color: var(--cafe-primary); border: none; font-weight: 500;">
-                                <i class="bi bi-cart-plus me-1"></i> Add to Cart
-                            </button>
-                        <?php else: ?>
-                            <button class="btn w-100 btn-secondary rounded-pill py-2" disabled style="background-color: #a0938d; border: none; opacity: 0.85; font-weight: 400;">
-                                Sold Out
-                            </button>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                                <!-- ปุ่มสั่งซื้อ หรือ แสดง Sold Out -->
+                                <div class="mt-auto pt-2">
+                                    <?php if ($p['stock'] > 0): ?>
+                                        <button onclick="addToCart('<?= htmlspecialchars($p['name']); ?>', <?=$p['price']; ?>)" 
+                                                class="btn w-100 text-white rounded-pill py-2 shadow-sm" 
+                                                style="background-color: var(--cafe-primary); border: none; font-weight: 500;">
+                                            <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="btn w-100 btn-secondary rounded-pill py-2" disabled style="background-color: #a0938d; border: none; opacity: 0.85; font-weight: 400;">
+                                            Sold Out
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-12 text-center py-5 text-muted">Do not have any products available at the moment.</div>
+                <?php endif; ?>
             </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <div class="col-12 text-center py-5 text-muted">ยังไม่มีรายการเมนูให้บริการในขณะนี้</div>
-    <?php endif; ?>
-</div>
 
         </main>
     </div>
@@ -134,7 +155,7 @@ const productItems = document.querySelectorAll('.product-item');
 let activeCategory = '';
 
 function runFilter() {
-    const searchTerm = searchInput.value.toLowerCase().trim();
+    const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
     productItems.forEach(item => {
         const name = (item.getAttribute('data-name') || '').toLowerCase().trim();
@@ -144,25 +165,29 @@ function runFilter() {
         const matchCategory = (activeCategory === '') || (category === activeCategory);
 
         if (matchName && matchCategory) {
-            item.style.display = '';
+            item.style.setProperty('display', 'block', 'important');
         } else {
-            item.style.display = 'none';
+            item.style.setProperty('display', 'none', 'important');
         }
     });
 }
 
-searchInput.addEventListener('input', runFilter);
+if (searchInput) {
+    searchInput.addEventListener('input', runFilter);
+}
 
+// สลับหมวดหมู่
 categoryPills.forEach(pill => {
-    pill.addEventListener('click', function() {
+    pill.addEventListener('click', function(e) {
+        e.preventDefault();
         categoryPills.forEach(p => p.classList.remove('active'));
         this.classList.add('active');
-        activeCategory = this.getAttribute('data-category').toLowerCase().trim();
+        activeCategory = (this.getAttribute('data-category') || '').toLowerCase().trim();
         runFilter();
     });
 });
 
-// จำลองการกดเลือกเมนูใส่ตะกร้า
+// ตะกร้าสินค้าจำลอง
 let totalItems = 0;
 function addToCart(name, price) {
     totalItems++;
@@ -170,7 +195,7 @@ function addToCart(name, price) {
 
     Swal.fire({
         icon: 'success',
-        title: 'เพิ่มลงตะกร้าแล้ว!',
+        title: 'เพิ่มลงในตะกร้าแล้ว!',
         text: `${name} (ราคา ฿${price.toFixed(2)})`,
         timer: 1200,
         showConfirmButton: false,

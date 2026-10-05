@@ -2,56 +2,39 @@
 require_once '../includes/auth_check.php';
 require_once '../config/db.php';
 
-$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+$id = $_GET['id'] ?? null;
 if (!$id) {
     header("Location: index.php");
-    exit();
+    exit;
 }
 
-$categories = $conn->query("SELECT * FROM categories")->fetchAll();
-
-// ดึงข้อมูลเดิมมาแสดง
-$stmt = $conn->prepare("SELECT * FROM products WHERE id = :id LIMIT 1");
-$stmt->execute([':id' => $id]);
+// ดึงข้อมูลสินค้าที่ต้องการแก้ไข
+$stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
+$stmt->execute([$id]);
 $product = $stmt->fetch();
 
 if (!$product) {
-    $_SESSION['error'] = "No menu item found with ID $id.";
     header("Location: index.php");
-    exit();
+    exit;
 }
 
-$errors = [];
+// ดึงหมวดหมู่
+$categories = $conn->query("SELECT * FROM categories")->fetchAll();
 
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
-    $category_id = $_POST['category_id'] ?? '';
-    $price = $_POST['price'] ?? '';
-    $stock = $_POST['stock'] ?? '';
+    $category_id = $_POST['category_id'] ?? null;
+    $price = $_POST['price'] ?? 0;
+    $stock = $_POST['stock'] ?? 0;
 
-    // Validation
-    if (empty($name)) $errors[] = "Please enter the menu name.";
-    if (empty($category_id)) $errors[] = "Please select a category.";
-    if (!is_numeric($price) || $price < 0) $errors[] = "Please enter a valid price.";
-    if (!filter_var($stock, FILTER_VALIDATE_INT, ["options" => ["min_range" => 0]])) $errors[] = "Please enter a valid stock quantity.";
-
-    if (empty($errors)) {
-        try {
-            $updateStmt = $conn->prepare("UPDATE products SET name = :name, category_id = :category_id, price = :price, stock = :stock WHERE id = :id");
-            $updateStmt->execute([
-                ':name' => $name,
-                ':category_id' => $category_id,
-                ':price' => $price,
-                ':stock' => $stock,
-                ':id' => $id
-            ]);
-
-            $_SESSION['success'] = "Updated menu \"$name\" successfully!";
-            header("Location: index.php");
-            exit();
-        } catch (PDOException $e) {
-            $errors[] = "An error occurred while updating the menu: " . $e->getMessage();
-        }
+    if (!empty($name) && !empty($category_id) && $price >= 0 && $stock >= 0) {
+        $updateStmt = $conn->prepare("UPDATE products SET name = ?, category_id = ?, price = ?, stock = ? WHERE id = ?");
+        $updateStmt->execute([$name, $category_id, $price, $stock, $id]);
+        header("Location: index.php");
+        exit;
+    } else {
+        $error = "Please fill in all required fields correctly.";
     }
 }
 ?>
@@ -60,62 +43,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Menu Item - Cafe System</title>
+    <title>Edit Menu - Purr'Coffee</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body class="bg-light">
+<body class="py-5">
 
-<div class="container py-5" style="max-width: 600px;">
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="card-title mb-0">✏️ Edit Menu Item (#<?= $product['id']; ?>)</h5>
-        </div>
-        <div class="card-body p-4">
+<div class="container" style="max-width: 580px;">
+    
+    <div class="mb-4 d-flex align-items-center justify-content-between">
+        <a href="index.php" class="text-decoration-none text-muted small">
+            <i class="bi bi-chevron-left"></i> กลับหน้ารายการเมนู
+        </a>
+        <span class="badge bg-white text-muted border rounded-pill px-3 py-2">ID: #<?= $product['id']; ?></span>
+    </div>
 
-            <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger py-2">
-                    <ul class="mb-0 small ps-3">
-                        <?php foreach ($errors as $err): ?>
-                            <li><?= htmlspecialchars($err); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+        <h3 class="fw-normal mb-1">แก้ไขเมนูสินค้า</h3>
+        <p class="text-muted small mb-4">ปรับปรุงรายละเอียด ราคา และจำนวนสต็อก</p>
+
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger py-2 small rounded-3 border-0 mb-4" role="alert">
+                <i class="bi bi-exclamation-circle me-1"></i> <?= htmlspecialchars($error); ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="">
+            <div class="mb-3">
+                <label class="form-label small text-muted">ชื่อเมนูสินค้า</label>
+                <input type="text" name="name" class="form-control rounded-3 px-3 py-2 border-0 bg-light" value="<?= htmlspecialchars($product['name']); ?>" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small text-muted">หมวดหมู่</label>
+                <select name="category_id" class="form-select rounded-3 px-3 py-2 border-0 bg-light" required>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?= $cat['id']; ?>" <?= ($cat['id'] == $product['category_id']) ? 'selected' : ''; ?>>
+                            <?= htmlspecialchars($cat['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">ราคา (บาท)</label>
+                    <input type="number" step="0.01" min="0" name="price" class="form-control rounded-3 px-3 py-2 border-0 bg-light" value="<?= $product['price']; ?>" required>
                 </div>
-            <?php endif; ?>
-
-            <form action="edit.php?id=<?= $id; ?>" method="POST">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Menu Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="name" name="name" required value="<?= htmlspecialchars($_POST['name'] ?? $product['name']); ?>">
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">จำนวนในสต็อก</label>
+                    <input type="number" min="0" name="stock" class="form-control rounded-3 px-3 py-2 border-0 bg-light" value="<?= $product['stock']; ?>" required>
                 </div>
+            </div>
 
-                <div class="mb-3">
-                    <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
-                    <select class="form-select" id="category_id" name="category_id" required>
-                        <?php foreach ($categories as $cat): ?>
-                            <option value="<?= $cat['id']; ?>" <?= (($_POST['category_id'] ?? $product['category_id']) == $cat['id']) ? 'selected' : ''; ?>>
-                                <?= htmlspecialchars($cat['name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn text-white rounded-pill px-4 py-2 flex-grow-1 shadow-sm" style="background-color: var(--cafe-primary); border: none; font-weight: 500;">
+                    บันทึกการเปลี่ยนแปลง
+                </button>
+                <a href="index.php" class="btn btn-light rounded-pill px-4 py-2 border text-muted">
+                    ยกเลิก
+                </a>
+            </div>
+        </form>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="price" class="form-label">Price (THB) <span class="text-danger">*</span></label>
-                        <input type="number" step="0.25" min="0" class="form-control" id="price" name="price" required value="<?= htmlspecialchars($_POST['price'] ?? $product['price']); ?>">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="stock" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
-                        <input type="number" min="0" class="form-control" id="stock" name="stock" required value="<?= htmlspecialchars($_POST['stock'] ?? $product['stock']); ?>">
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="index.php" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-warning px-4">Save Changes</button>
-                </div>
-            </form>
-        </div>
     </div>
 </div>
 

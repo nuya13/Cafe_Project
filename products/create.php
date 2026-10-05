@@ -15,16 +15,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validation (ตรวจสอบความถูกต้องของข้อมูล)
     if (empty($name)) {
-        $errors[] = "please enter the menu name";
+        $errors[] = "Please enter the menu name";
     }
     if (empty($category_id)) {
-        $errors[] = "please select a category";
+        $errors[] = "Please select a category";
     }
     if (!is_numeric($price) || $price < 0) {
-        $errors[] = "price must be a number greater than or equal to 0";
+        $errors[] = "Price must be a number greater than or equal to 0";
     }
     if (!filter_var($stock, FILTER_VALIDATE_INT, ["options" => ["min_range" => 0]])) {
-        $errors[] = "stock must be a positive integer or 0";
+        $errors[] = "Stock must be a positive integer or 0";
     }
 
     // ถ้าไม่มี error ให้บันทึกลงฐานข้อมูล
@@ -52,63 +52,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Menu - Cafe System</title>
+    <title>Add New Menu - Tomodachi café</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body class="bg-light">
+<body class="py-5">
 
-<div class="container py-5" style="max-width: 600px;">
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="card-title mb-0">➕ Add New Menu</h5>
-        </div>
-        <div class="card-body p-4">
+<div class="container" style="max-width: 580px;">
+    
+    <div class="mb-4 d-flex align-items-center justify-content-between">
+        <a href="index.php" class="text-decoration-none text-muted small">
+            <i class="bi bi-chevron-left"></i> Back to Menu List
+        </a>
+        <span class="badge bg-white text-muted border rounded-pill px-3 py-2">New Item</span>
+    </div>
 
-            <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger py-2">
-                    <ul class="mb-0 small ps-3">
-                        <?php foreach ($errors as $err): ?>
-                            <li><?= htmlspecialchars($err); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+        <h3 class="fw-normal mb-1">Add New Menu</h3>
+        <p class="text-muted small mb-4">Add fresh coffee, drinks, or bakery items to the system</p>
+
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-danger py-2 small rounded-3 border-0 mb-4" role="alert">
+                <ul class="mb-0 ps-3">
+                    <?php foreach ($errors as $err): ?>
+                        <li><?= htmlspecialchars($err); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+
+        <form action="create.php" method="POST" id="createForm">
+            <div class="mb-3">
+                <label for="name" class="form-label small text-muted">Menu Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control rounded-3 px-3 py-2 border-0 bg-light" id="name" name="name" required placeholder="e.g. Vanilla Latte, Matcha Cake" value="<?= htmlspecialchars($_POST['name'] ?? ''); ?>">
+            </div>
+
+            <div class="mb-3">
+                <label for="category_id" class="form-label small text-muted">Category <span class="text-danger">*</span></label>
+                <select class="form-select rounded-3 px-3 py-2 border-0 bg-light" id="category_id" name="category_id" required>
+                    <option value="" disabled <?= empty($_POST['category_id']) ? 'selected' : ''; ?>>-- Select Category --</option>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?= $cat['id']; ?>" <?= (($_POST['category_id'] ?? '') == $cat['id']) ? 'selected' : ''; ?>>
+                            <?= htmlspecialchars($cat['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="price" class="form-label small text-muted">Price (THB) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.25" min="0" class="form-control rounded-3 px-3 py-2 border-0 bg-light" id="price" name="price" required placeholder="0.00" value="<?= htmlspecialchars($_POST['price'] ?? ''); ?>">
                 </div>
-            <?php endif; ?>
-
-            <form action="create.php" method="POST" id="createForm">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Menu Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="name" name="name" required value="<?= htmlspecialchars($_POST['name'] ?? ''); ?>">
+                <div class="col-md-6">
+                    <label for="stock" class="form-label small text-muted">Stock Quantity <span class="text-danger">*</span></label>
+                    <input type="number" min="0" class="form-control rounded-3 px-3 py-2 border-0 bg-light" id="stock" name="stock" required placeholder="10" value="<?= htmlspecialchars($_POST['stock'] ?? '10'); ?>">
                 </div>
+            </div>
 
-                <div class="mb-3">
-                    <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
-                    <select class="form-select" id="category_id" name="category_id" required>
-                        <option value="">-- Select Category --</option>
-                        <?php foreach ($categories as $cat): ?>
-                            <option value="<?= $cat['id']; ?>" <?= (($_POST['category_id'] ?? '') == $cat['id']) ? 'selected' : ''; ?>>
-                                <?= htmlspecialchars($cat['name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn text-white rounded-pill px-4 py-2 flex-grow-1 shadow-sm" style="background-color: var(--cafe-primary); border: none; font-weight: 500;">
+                    Save Data
+                </button>
+                <a href="index.php" class="btn btn-light rounded-pill px-4 py-2 border text-muted">
+                    Cancel
+                </a>
+            </div>
+        </form>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="price" class="form-label">Price (THB) <span class="text-danger">*</span></label>
-                        <input type="number" step="0.25" min="0" class="form-control" id="price" name="price" required value="<?= htmlspecialchars($_POST['price'] ?? ''); ?>">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="stock" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
-                        <input type="number" min="0" class="form-control" id="stock" name="stock" required value="<?= htmlspecialchars($_POST['stock'] ?? '10'); ?>">
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="index.php" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary px-4">Save Data</button>
-                </div>
-            </form>
-        </div>
     </div>
 </div>
 
