@@ -2,10 +2,10 @@
 require_once '../includes/auth_check.php';
 require_once '../config/db.php';
 
-// ดึงรายการหมวดหมู่สำหรับตัวกรอง
+// Retrieve all data from categories and products tables
 $categories =$conn->query("SELECT * FROM categories")->fetchAll();
 
-// ดึงรายการสินค้าทั้งหมด พร้อมชื่อหมวดหมู่ (ใช้ JOIN)
+// Retrieve all data from products table with category names
 $sql = "SELECT p.*, c.name AS category_name 
         FROM products p 
         LEFT JOIN categories c ON p.category_id = c.id 
@@ -18,167 +18,172 @@ $products =$stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดการเมนูสินค้า - Cafe System</title>
-    <!-- Bootstrap 5 CSS -->
+    <title>Tomodachi café Menu - Cafe Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body class="bg-light">
+<body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index.php">☕ Cafe Management</a>
-        <div class="d-flex align-items-center text-white">
-            <span class="me-3 small">
-                User: <b><?= htmlspecialchars($_SESSION['fullname']); ?></b> 
-                <span class="badge bg-secondary"><?= htmlspecialchars($_SESSION['role']); ?></span>
-            </span>
-            <a href="../auth/logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
-        </div>
-    </div>
-</nav>
-
-<div class="container py-4">
-
-    <!-- แจ้งเตือนสถานะสำเร็จ/ล้มเหลว ผ่าน Session -->
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-        <h3 class="mb-0">📋Drink and Bakery Menu</h3>
-        <a href="create.php" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Add New Menu
-        </a>
-    </div>
-
-    <!-- ส่วนค้นหาและตัวกรอง (JavaScript Interactivity) -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <div class="row g-2">
-                <div class="col-md-8">
-                    <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search menu items...">
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar ซ้ายตามแบบภาพเป๊ะๆ -->
+        <aside class="col-md-3 col-lg-2 sidebar p-4 d-flex flex-column justify-content-between">
+            <div>
+                <div class="brand-title mb-4 d-flex align-items-center gap-2">
+                    <span>☕</span> Tomodachi café
                 </div>
-                <div class="col-md-4">
-                    <select id="categoryFilter" class="form-select">
-                        <option value="">All Categories</option>
-                        <?php foreach ($categories as$cat): ?>
-                            <option value="<?= htmlspecialchars($cat['name']); ?>"><?= htmlspecialchars($cat['name']); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+
+                <div class="d-flex flex-column gap-2">
+                    <a href="index.php" class="nav-link-custom active">
+                        <i class="bi bi-grid-fill"></i> Coffee Menu
+                    </a>
+                    <a href="create.php" class="nav-link-custom">
+                        <i class="bi bi-plus-circle"></i> Add Menu
+                    </a>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- ตารางแสดงสินค้า -->
-    <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="productsTable">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 80px;">รหัส (ID)</th>
-                        <th>ชื่อเมนู (Name)</th>
-                        <th>หมวดหมู่ (Category)</th>
-                        <th class="text-end">ราคา (บาท) (Price)</th>
-                        <th class="text-center">สต็อก (ชิ้น/แก้ว) (Stock)</th>
-                        <th class="text-center" style="width: 150px;">จัดการ (Actions)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (count($products) > 0): ?>
-                        <?php foreach ($products as$p): ?>
-                            <tr class="product-row">
-                                <td class="text-muted">#<?= $p['id']; ?></td>
-                                <td class="fw-semibold product-name"><?= htmlspecialchars($p['name']); ?></td>
-                                <td>
-                                    <span class="badge bg-info text-dark product-category">
-                                        <?= htmlspecialchars($p['category_name'] ?? 'ไม่มีหมวดหมู่'); ?>
-                                    </span>
-                                </td>
-                                <td class="text-end fw-bold"><?= number_format($p['price'], 2); ?></td>
-                                <td class="text-center">
-                                    <?php if ($p['stock'] > 5): ?>
-                                        <span class="badge bg-success"><?= $p['stock']; ?></span>
-                                    <?php elseif ($p['stock'] > 0): ?>
-                                        <span class="badge bg-warning text-dark"><?= $p['stock']; ?> (ใกล้หมด)</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-danger">หมดสต็อก</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-center">
-                                    <a href="edit.php?id=<?= $p['id']; ?>" class="btn btn-sm btn-outline-warning me-1">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <!-- ปุ่มลบจะเรียกฟังก์ชัน confirmDelete ใน JS -->
-                                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr id="noDataRow">
-                            <td colspan="6" class="text-center py-4 text-muted">No menu items available. Click "Add New Menu" to get started.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+            <!-- กล่องข้อมูลผู้ใช้และปุ่ม Logout ด้านล่าง -->
+            <div class="pt-3 border-top" style="border-color: var(--cafe-border) !important;">
+                <div class="small fw-bold text-truncate"><?= htmlspecialchars($_SESSION['fullname']); ?></div>
+                <div class="badge bg-secondary mb-2"><?= htmlspecialchars($_SESSION['role']); ?></div>
+                <a href="../auth/logout.php" class="nav-link-custom text-danger px-0">
+                    <i class="bi bi-box-arrow-left"></i> Log out
+                </a>
+            </div>
+        </aside>
 
+        <!-- Main Content ขวามือ -->
+        <main class="col-md-9 col-lg-10 p-4 p-md-5">
+
+            <!-- แถบค้นหาด้านบน -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                <div class="flex-grow-1" style="max-width: 450px;">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-0 rounded-start-pill ps-3 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control border-0 rounded-end-pill py-2" placeholder="Search menu...">
+                    </div>
+                </div>
+
+                <a href="create.php" class="btn btn-warning text-white fw-bold px-4 py-2 rounded-pill shadow-sm" style="background-color: var(--cafe-primary); border: none;">
+                    <i class="bi bi-plus-lg me-1"></i> Add Menu
+                </a>
+            </div>
+
+            <!-- หัวข้อหน้าและปุ่มหมวดหมู่ (Category Pills) -->
+            <h2 class="fw-bold mb-3">Coffee menu</h2>
+            <p class="text-muted mb-4">Manage your menu, check stock levels, and update each item quickly from one simple dashboard.</p>
+
+            <div class="d-flex flex-wrap gap-2 mb-4" id="categoryPills">
+                <button type="button" class="category-pill active" data-category="">All</button>
+                <?php foreach ($categories as$cat): ?>
+                    <button type="button" class="category-pill" data-category="<?= htmlspecialchars($cat['name']); ?>">
+                        <?= htmlspecialchars($cat['name']); ?>
+                    </button>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Grid แสดงการ์ดสินค้า -->
+            <div class="row g-4" id="productGrid">
+    <?php if (count($products) > 0): ?>
+        <?php foreach ($products as $p): ?>
+            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 product-item" 
+                 data-name="<?= strtolower(htmlspecialchars($p['name'])); ?>" 
+                 data-category="<?= strtolower(htmlspecialchars($p['category_name'] ?? '')); ?>">
+                
+                <div class="card product-card shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="fw-bold mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
+                        <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
+                    </div>
+
+                    <div class="text-muted small mb-3">
+                        Category: <span class="badge bg-light text-dark border"><?= htmlspecialchars($p['category_name'] ?? 'ทั่วไป'); ?></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                        <small class="text-muted">
+                            Stock: <b><?= $p['stock']; ?></b>
+                        </small>
+                        <div class="btn-group">
+                            <a href="edit.php?id=<?= $p['id']; ?>" class="btn btn-outline-secondary btn-sm btn-cafe-action">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <button onclick="confirmDelete(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>')" class="btn btn-outline-danger btn-sm btn-cafe-action">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="col-12 text-center py-5 text-muted">
+            <div class="fw-medium">Do not have any products</div>
+            <small class="d-block mt-2">Please add a new menu to start managing your food and beverage items</small>
+        </div>
+    <?php endif; ?>
 </div>
 
-<!-- Bootstrap 5 JS Bundle -->
+        </main>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- SweetAlert2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-// 1. ฟังก์ชัน Real-time Search & Filter ด้วย JavaScript
+// Filter & Search ทำงานร่วมกันแบบ Real-time
 const searchInput = document.getElementById('searchInput');
-const categoryFilter = document.getElementById('categoryFilter');
-const tableRows = document.querySelectorAll('.product-row');
+const categoryPills = document.querySelectorAll('.category-pill');
+const productItems = document.querySelectorAll('.product-item');
+let activeCategory = '';
 
-function filterProducts() {
+function runFilter() {
     const searchTerm = searchInput.value.toLowerCase().trim();
-    const selectedCategory = categoryFilter.value.toLowerCase().trim();
 
-    tableRows.forEach(row => {
-        const productName = row.querySelector('.product-name').textContent.toLowerCase();
-        const productCategory = row.querySelector('.product-category').textContent.toLowerCase();
+    productItems.forEach(item => {
+        const name = item.getAttribute('data-name');
+        const category = item.getAttribute('data-category');
 
-        const matchName = productName.includes(searchTerm);
-        const matchCategory = selectedCategory === '' || productCategory.includes(selectedCategory);
+        const matchName = name.includes(searchTerm);
+        const matchCategory = (activeCategory === '') || category.includes(activeCategory);
 
         if (matchName && matchCategory) {
-            row.style.display = '';
+            item.style.display = '';
         } else {
-            row.style.display = 'none';
+            item.style.display = 'none';
         }
     });
 }
 
-searchInput.addEventListener('keyup', filterProducts);
-categoryFilter.addEventListener('change', filterProducts);
+searchInput.addEventListener('input', runFilter);
 
-// 2. ฟังก์ชันยืนยันก่อนลบสินค้าด้วย SweetAlert2
+// กดสลับ Category Pill
+categoryPills.forEach(pill => {
+    pill.addEventListener('click', function() {
+        categoryPills.forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        activeCategory = this.getAttribute('data-category').toLowerCase().trim();
+        runFilter();
+    });
+});
+
+// SweetAlert2 ยืนยันการลบ
 function confirmDelete(id, name) {
     Swal.fire({
-        title: 'Confirm Menu Deletion?',
-        text: `Are you sure you want to delete "${name}" from the system?`,
+        title: 'Are you sure?',
+        text: `You want to delete "${name}" from the system?`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
+        confirmButtonColor: '#D97745',
         cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Delete',
+        confirmButtonText: 'Delete Data',
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {

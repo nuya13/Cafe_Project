@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap');
+
+:root {
+    --cafe-bg: #F9EFE7;          
+    --cafe-sidebar: #F4E4D7;
+    --cafe-card: #FFFFFF;
+    --cafe-primary: #D97745;     
+    --cafe-primary-hover: #C56333;
+    --cafe-text-dark: #2F241F;
+    --cafe-text-muted: #8D7B74;
+    --cafe-border: #EBDAD0;
+}
+
+body {
+    font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--cafe-bg);
+    color: var(--cafe-text-dark);
+}
+
+/* Sidebar & Navigation */
+.sidebar {
+    background-color: var(--cafe-sidebar);
+    min-height: 100vh;
+    border-right: 1px solid var(--cafe-border);
+}
+
+.brand-title {
+    color: var(--cafe-text-dark);
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.nav-link-custom {
+    color: var(--cafe-text-dark);
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.nav-link-custom:hover, .nav-link-custom.active {
+    background-color: #EBD6C7;
+    color: var(--cafe-primary);
+}
+
+/* ค้นหาและตัวกรอง */
+.search-input-pill {
+    background-color: #FFFFFF;
+    border: 1px solid transparent;
+    border-radius: 30px;
+    padding: 10px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.search-input-pill:focus {
+    border-color: var(--cafe-primary);
+    box-shadow: 0 0 0 0.2rem rgba(217, 119, 69, 0.15);
+}
+
+/* ปุ่มหมวดหมู่แบบ Pill */
+.category-pill {
+    background-color: #FFFFFF;
+    color: var(--cafe-text-dark);
+    border: 1px solid var(--cafe-border);
+    border-radius: 30px;
+    padding: 7px 22px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-pill:hover, .category-pill.active {
+    background-color: var(--cafe-primary);
+    color: #FFFFFF;
+    border-color: var(--cafe-primary);
+}
+
+/* การ์ดเมนูสินค้า */
+.product-card {
+    background-color: var(--cafe-card);
+    border-radius: 20px;
+    border: 1px solid var(--cafe-border);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(217, 119, 69, 0.1);
+}
+
+.product-card-img-wrap {
+    height: 160px;
+    background: linear-gradient(135deg, #F3ECE7 0%, #E7D7CC 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+}
+
+.product-price {
+    color: var(--cafe-primary);
+    font-weight: 700;
+    font-size: 1.15rem;
+}
+
+.btn-cafe-action {
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.85rem;
+}

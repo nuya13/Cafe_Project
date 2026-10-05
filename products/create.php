@@ -15,16 +15,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validation (ตรวจสอบความถูกต้องของข้อมูล)
     if (empty($name)) {
-        $errors[] = "กรุณากรอกชื่อเมนู";
+        $errors[] = "please enter the menu name";
     }
     if (empty($category_id)) {
-        $errors[] = "กรุณาเลือกหมวดหมู่";
+        $errors[] = "please select a category";
     }
     if (!is_numeric($price) || $price < 0) {
-        $errors[] = "ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0";
+        $errors[] = "price must be a number greater than or equal to 0";
     }
     if (!filter_var($stock, FILTER_VALIDATE_INT, ["options" => ["min_range" => 0]])) {
-        $errors[] = "จำนวนสต็อกต้องเป็นจำนวนเต็มบวกหรือ 0";
+        $errors[] = "stock must be a positive integer or 0";
     }
 
     // ถ้าไม่มี error ให้บันทึกลงฐานข้อมูล
@@ -38,11 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':stock' => $stock
             ]);
 
-            $_SESSION['success'] = "เพิ่มเมนู \"$name\" เรียบร้อยแล้ว!";
+            $_SESSION['success'] = "Added menu \"$name\" successfully!";
             header("Location: index.php");
             exit();
         } catch (PDOException $e) {
-            $errors[] = "เกิดข้อผิดพลาดในการบันทึก: " . $e->getMessage();
+            $errors[] = "An error occurred while saving: " . $e->getMessage();
         }
     }
 }
@@ -76,14 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form action="create.php" method="POST" id="createForm">
                 <div class="mb-3">
-                    <label for="name" class="form-label">ชื่อเมนู <span class="text-danger">*</span></label>
+                    <label for="name" class="form-label">Menu Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="name" name="name" required value="<?= htmlspecialchars($_POST['name'] ?? ''); ?>">
                 </div>
 
                 <div class="mb-3">
-                    <label for="category_id" class="form-label">หมวดหมู่ <span class="text-danger">*</span></label>
+                    <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
                     <select class="form-select" id="category_id" name="category_id" required>
-                        <option value="">-- เลือกหมวดหมู่ --</option>
+                        <option value="">-- Select Category --</option>
                         <?php foreach ($categories as $cat): ?>
                             <option value="<?= $cat['id']; ?>" <?= (($_POST['category_id'] ?? '') == $cat['id']) ? 'selected' : ''; ?>>
                                 <?= htmlspecialchars($cat['name']); ?>
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="price" class="form-label">ราคา (บาท) <span class="text-danger">*</span></label>
+                        <label for="price" class="form-label">Price (THB) <span class="text-danger">*</span></label>
                         <input type="number" step="0.25" min="0" class="form-control" id="price" name="price" required value="<?= htmlspecialchars($_POST['price'] ?? ''); ?>">
                     </div>
                     <div class="col-md-6 mb-3">
