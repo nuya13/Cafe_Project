@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="text-center mb-4">
             <span class="fs-1">☕</span>
             <h3 class="fw-normal mt-2 mb-1">เข้าสู่ระบบสมาชิก</h3>
-            <p class="text-muted small">Tomodachi café Digital Menu</p>
+            <p class="text-muted small">Welcome to Tomodachi Café</p>
         </div>
 
         <?php if (!empty($error)): ?>

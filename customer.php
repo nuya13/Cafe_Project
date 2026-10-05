@@ -144,65 +144,9 @@ $products = $conn->query($sql)->fetchAll();
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-// Filter & Search ทำงานร่วมกันแบบ Real-time
-const searchInput = document.getElementById('searchInput');
-const categoryPills = document.querySelectorAll('.category-pill');
-const productItems = document.querySelectorAll('.product-item');
-let activeCategory = '';
-
-function runFilter() {
-    const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
-
-    productItems.forEach(item => {
-        const name = (item.getAttribute('data-name') || '').toLowerCase().trim();
-        const category = (item.getAttribute('data-category') || '').toLowerCase().trim();
-
-        const matchName = name.includes(searchTerm);
-        const matchCategory = (activeCategory === '') || (category === activeCategory);
-
-        if (matchName && matchCategory) {
-            item.style.setProperty('display', 'block', 'important');
-        } else {
-            item.style.setProperty('display', 'none', 'important');
-        }
-    });
-}
-
-if (searchInput) {
-    searchInput.addEventListener('input', runFilter);
-}
-
-// สลับหมวดหมู่
-categoryPills.forEach(pill => {
-    pill.addEventListener('click', function(e) {
-        e.preventDefault();
-        categoryPills.forEach(p => p.classList.remove('active'));
-        this.classList.add('active');
-        activeCategory = (this.getAttribute('data-category') || '').toLowerCase().trim();
-        runFilter();
-    });
-});
-
-// ตะกร้าสินค้าจำลอง
-let totalItems = 0;
-function addToCart(name, price) {
-    totalItems++;
-    document.getElementById('cartCount').textContent = totalItems;
-
-    Swal.fire({
-        icon: 'success',
-        title: 'เพิ่มลงในตะกร้าแล้ว!',
-        text: `${name} (ราคา ฿${price.toFixed(2)})`,
-        timer: 1200,
-        showConfirmButton: false,
-        toast: true,
-        position: 'top-end'
-    });
-}
-</script>
+<!-- เรียกใช้ Bootstrap, SweetAlert2 และ customer.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/customer.js"></script>
 </body>
 </html>
