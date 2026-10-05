@@ -70,7 +70,7 @@ $products = $conn->query($sql)->fetchAll();
             </div>
 
             <!-- หัวข้อและปุ่มหมวดหมู่ -->
-            <h2 class="fw-bold mb-3">Coffee menu</h2>
+            <h2 class="fw-normal mb-3">Coffee menu</h2>
 
             <div class="d-flex flex-wrap gap-2 mb-4" id="categoryPills">
                 <button type="button" class="category-pill active" data-category="">All</button>
@@ -83,45 +83,41 @@ $products = $conn->query($sql)->fetchAll();
 
             <!-- การ์ดสินค้า (ไม่มีปุ่มแก้ไข/ลบ แต่มีปุ่มจำลองสั่งซื้อ) -->
             <div class="row g-4" id="productGrid">
-                <?php if (count($products) > 0): ?>
-                    <?php foreach ($products as$p): ?>
-                        <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 product-item" 
-                             data-name="<?= strtolower(htmlspecialchars($p['name'])); ?>" 
-                             data-category="<?= strtolower(htmlspecialchars($p['category_name'] ?? '')); ?>">
-                            
-                            <div class="card product-card shadow-sm p-3">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="fw-bold mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
-                                    <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
-                                </div>
+    <?php if (count($products) > 0): ?>
+        <?php foreach ($products as $p): ?>
+            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 product-item" 
+                 data-name="<?= htmlspecialchars($p['name']); ?>" 
+                 data-category="<?= htmlspecialchars($p['category_name'] ?? ''); ?>">
+                
+                <div class="card product-card shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
+                    <!-- ส่วนแสดงชื่อเมนูและราคา -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-normal mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
+                        <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
+                    </div>
 
-                                <div class="text-muted small mb-3">
-                                    Category: <span class="badge bg-light text-dark border"><?= htmlspecialchars($p['category_name'] ?? 'ทั่วไป'); ?></span>
-                                </div>
+                    <!-- ส่วนปุ่มสั่งซื้อ หรือ แสดง Sold Out -->
+                    <div class="mt-auto pt-2">
+                        <?php if ($p['stock'] > 0): ?>
+                            <button onclick="addToCart('<?= htmlspecialchars($p['name']); ?>', <?= $p['price']; ?>)" 
+                                    class="btn w-100 text-white rounded-pill py-2 shadow-sm" 
+                                    style="background-color: var(--cafe-primary); border: none; font-weight: 500;">
+                                <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                            </button>
+                        <?php else: ?>
+                            <button class="btn w-100 btn-secondary rounded-pill py-2" disabled style="background-color: #a0938d; border: none; opacity: 0.85; font-weight: 400;">
+                                Sold Out
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
-                                <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
-                                    <small class="text-muted">
-                                        Stock: <b><?= $p['stock']; ?></b>
-                                    </small>
-                                    
-                                    <?php if ($p['stock'] > 0): ?>
-                                        <button onclick="addToCart('<?= htmlspecialchars($p['name']); ?>', <?=$p['price']; ?>)" 
-                                                class="btn btn-sm text-white px-3 rounded-pill fw-bold" 
-                                                style="background-color: var(--cafe-primary); border: none;">
-                                            <i class="bi bi-cart-plus me-1"></i> Add to Cart
-                                        </button>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Sold Out</span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="col-12 text-center py-5 text-muted">Do not have any products available at the moment.</div>
-                <?php endif; ?>
             </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="col-12 text-center py-5 text-muted">ยังไม่มีรายการเมนูให้บริการในขณะนี้</div>
+    <?php endif; ?>
+</div>
 
         </main>
     </div>
