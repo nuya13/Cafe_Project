@@ -3,7 +3,7 @@ require_once '../includes/auth_check.php';
 require_once '../config/db.php';
 
 // Retrieve all data from categories and products tables
-$categories =$conn->query("SELECT * FROM categories")->fetchAll();
+$categories = $conn->query("SELECT * FROM categories")->fetchAll();
 
 // Retrieve all data from products table with category names
 $sql = "SELECT p.*, c.name AS category_name 
@@ -11,7 +11,7 @@ $sql = "SELECT p.*, c.name AS category_name
         LEFT JOIN categories c ON p.category_id = c.id 
         ORDER BY p.id DESC";
 $stmt = $conn->query($sql);
-$products =$stmt->fetchAll();
+$products = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -47,8 +47,8 @@ $products =$stmt->fetchAll();
 
             <!-- กล่องข้อมูลผู้ใช้และปุ่ม Logout -->
             <div class="pt-3 border-top" style="border-color: var(--cafe-border) !important;">
-                <div class="small fw-bold text-truncate"><?= htmlspecialchars($_SESSION['fullname']); ?></div>
-                <div class="badge bg-secondary mb-2"><?= htmlspecialchars($_SESSION['role']); ?></div>
+                <div class="small fw-bold text-truncate"><?= htmlspecialchars($_SESSION['fullname'] ?? 'User'); ?></div>
+                <div class="badge bg-secondary mb-2"><?= htmlspecialchars($_SESSION['role'] ?? 'Staff'); ?></div>
                 <a href="../auth/logout.php" class="nav-link-custom text-danger px-0">
                     <i class="bi bi-box-arrow-left"></i> Log out
                 </a>
@@ -80,7 +80,7 @@ $products =$stmt->fetchAll();
             <!-- แถบปุ่มหมวดหมู่ (Category Pills) -->
             <div class="d-flex flex-wrap gap-2 mb-4" id="categoryPills">
                 <button type="button" class="category-pill active" data-category="">All</button>
-                <?php foreach ($categories as$cat): ?>
+                <?php foreach ($categories as $cat): ?>
                     <button type="button" class="category-pill" data-category="<?= htmlspecialchars($cat['name']); ?>">
                         <?= htmlspecialchars($cat['name']); ?>
                     </button>
@@ -90,7 +90,7 @@ $products =$stmt->fetchAll();
             <!-- กล่องสินค้า -->
             <div class="row g-4" id="productGrid">
                 <?php if (count($products) > 0): ?>
-                    <?php foreach ($products as$p): ?>
+                    <?php foreach ($products as $p): ?>
                         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 product-item" 
                              data-name="<?= htmlspecialchars($p['name']); ?>" 
                              data-category="<?= htmlspecialchars($p['category_name'] ?? ''); ?>">
@@ -111,12 +111,17 @@ $products =$stmt->fetchAll();
                                         Stock: <span><?= $p['stock']; ?></span>
                                     </small>
                                     <div class="btn-group">
-                                        <a href="edit.php?id=<?= $p['id']; ?>" class="btn btn-outline-secondary btn-sm rounded-start-pill px-3" style="font-size: 0.85rem;">
+                                        <!-- ปุ่ม Edit ทุกคน (Admin และ Staff) กดได้ -->
+                                        <a href="edit.php?id=<?= $p['id']; ?>" class="btn btn-outline-secondary btn-sm <?= (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') ? 'rounded-start-pill' : 'rounded-pill'; ?> px-3" style="font-size: 0.85rem;">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
-                                        <button onclick="confirmDelete(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>')" class="btn btn-outline-danger btn-sm rounded-end-pill px-2" style="font-size: 0.85rem;">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+
+                                        <!-- ปุ่ม Delete: แสดงเฉพาะ role 'admin' -->
+                                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                            <button onclick="confirmDelete(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>')" class="btn btn-outline-danger btn-sm rounded-end-pill px-2" style="font-size: 0.85rem;">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
