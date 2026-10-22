@@ -1,4 +1,17 @@
 <?php
+// เริ่ม Session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// ตรวจสอบว่ามีการล็อกอินของลูกค้าแล้วหรือยัง
+if (!isset($_SESSION['customer_id'])) {
+    // ถ้ายังไม่ได้ล็อกอิน ให้เด้งกลับไปหน้าเข้าสู่ระบบทันที
+    header("Location: customer_login.php");
+    exit();
+}
+?>
+<?php
 session_start();
 require_once 'config/db.php';
 
