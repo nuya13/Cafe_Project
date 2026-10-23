@@ -1,7 +1,7 @@
-// assets/js/customer.js
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. ระบบค้นหาและกรองหมวดหมู่สินค้าหน้าร้าน
+    //ระบบค้นหาและกรองหมวดหมู่สินค้าหน้าร้าน
     const searchInput = document.getElementById('searchInput');
     const categoryPills = document.querySelectorAll('.category-pill');
     const productItems = document.querySelectorAll('.product-item');
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 2. ระบบจำลองสั่งซื้อหยิบใส่ตะกร้า (Cart)
+// ระบบจำลองสั่งซื้อหยิบใส่ตะกร้า
 let totalItems = 0;
 function addToCart(name, price) {
     totalItems++;

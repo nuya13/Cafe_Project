@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. ระบบค้นหาและกรองหมวดหมู่สินค้า
+    // ระบบค้นหาและกรองหมวดหมู่สินค้า
     const searchInput = document.getElementById('searchInput');
     const categoryPills = document.querySelectorAll('.category-pill');
     const productItems = document.querySelectorAll('.product-item');
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 2. SweetAlert2 ยืนยันการลบสินค้า
+// ยืนยันการลบสินค้า
 function confirmDelete(id, name) {
     Swal.fire({
         title: 'Are you sure?',

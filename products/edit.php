@@ -8,7 +8,7 @@ if (!$id) {
     exit;
 }
 
-// ดึงข้อมูลสินค้าที่ต้องการแก้ไข
+// ดึงข้อมูลสินค้าที่จะทำการแก้ไข
 $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
 $stmt->execute([$id]);
 $product = $stmt->fetch();
@@ -18,7 +18,7 @@ if (!$product) {
     exit;
 }
 
-// ดึงหมวดหมู่
+
 $categories = $conn->query("SELECT * FROM categories")->fetchAll();
 
 $error = '';

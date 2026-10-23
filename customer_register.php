@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="">
             <div class="mb-3">
                 <label class="form-label small text-muted">ชื่อ-นามสกุล / ชื่อเล่น</label>
-                <input type="text" name="fullname" class="form-control rounded-pill px-3 py-2 border-0 bg-light" required placeholder="เช่น พิมลดา">
+                <input type="text" name="fullname" class="form-control rounded-pill px-3 py-2 border-0 bg-light" required placeholder="เช่น ธนกร">
             </div>
             <div class="mb-3">
                 <label class="form-label small text-muted">อีเมล (Email)</label>

@@ -4,7 +4,7 @@ require_once '../config/db.php';
 
 $errors = [];
 
-// ดึงหมวดหมู่มาใส่ใน dropdown
+
 $categories = $conn->query("SELECT * FROM categories")->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = $_POST['price'] ?? '';
     $stock = $_POST['stock'] ?? '';
 
-    // Validation (ตรวจสอบความถูกต้องของข้อมูล)
+    // Validation 
     if (empty($name)) {
         $errors[] = "Please enter the menu name";
     }

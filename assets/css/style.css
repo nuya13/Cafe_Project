@@ -17,7 +17,7 @@ body {
     color: var(--cafe-text-dark);
 }
 
-/* Sidebar & Navigation */
+
 .sidebar {
     background-color: var(--cafe-sidebar);
     min-height: 100vh;
@@ -61,7 +61,7 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(217, 119, 69, 0.15);
 }
 
-/* ปุ่มหมวดหมู่แบบ Pill */
+
 .category-pill {
     background-color: #FFFFFF;
     color: var(--cafe-text-dark);
@@ -80,7 +80,7 @@ body {
     border-color: var(--cafe-primary);
 }
 
-/* การ์ดเมนูสินค้า */
+
 .product-card {
     background-color: var(--cafe-card);
     border-radius: 20px;

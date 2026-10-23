@@ -28,7 +28,7 @@ $products = $stmt->fetchAll();
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar ซ้าย -->
+        
         <aside class="col-md-3 col-lg-2 sidebar p-4 d-flex flex-column justify-content-between">
             <div>
                 <div class="brand-title mb-4 d-flex align-items-center gap-2">
@@ -45,7 +45,7 @@ $products = $stmt->fetchAll();
                 </div>
             </div>
 
-            <!-- กล่องข้อมูลผู้ใช้และปุ่ม Logout -->
+            <!-- ปุ่ม Logout -->
             <div class="pt-3 border-top" style="border-color: var(--cafe-border) !important;">
                 <div class="small fw-bold text-truncate"><?= htmlspecialchars($_SESSION['fullname'] ?? 'User'); ?></div>
                 <div class="badge bg-secondary mb-2"><?= htmlspecialchars($_SESSION['role'] ?? 'Staff'); ?></div>
@@ -111,12 +111,12 @@ $products = $stmt->fetchAll();
                                         Stock: <span><?= $p['stock']; ?></span>
                                     </small>
                                     <div class="btn-group">
-                                        <!-- ปุ่ม Edit ทุกคน (Admin และ Staff) กดได้ -->
+                                        <!-- ปุ่ม Edit -->
                                         <a href="edit.php?id=<?= $p['id']; ?>" class="btn btn-outline-secondary btn-sm <?= (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') ? 'rounded-start-pill' : 'rounded-pill'; ?> px-3" style="font-size: 0.85rem;">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
 
-                                        <!-- ปุ่ม Delete: แสดงเฉพาะ role 'admin' -->
+                                        <!-- ปุ่ม Delete -->
                                         <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                                             <button onclick="confirmDelete(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>')" class="btn btn-outline-danger btn-sm rounded-end-pill px-2" style="font-size: 0.85rem;">
                                                 <i class="bi bi-trash"></i>

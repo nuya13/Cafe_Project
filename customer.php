@@ -1,12 +1,11 @@
 <?php
-// เริ่ม Session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // ตรวจสอบว่ามีการล็อกอินของลูกค้าแล้วหรือยัง
 if (!isset($_SESSION['customer_id'])) {
-    // ถ้ายังไม่ได้ล็อกอิน ให้เด้งกลับไปหน้าเข้าสู่ระบบทันที
+    // ถ้ายังไม่ได้ล็อกอิน ให้เด้งกลับไปหน้าเข้าสู่ระบบ
     header("Location: customer_login.php");
     exit();
 }
@@ -15,7 +14,7 @@ if (!isset($_SESSION['customer_id'])) {
 session_start();
 require_once 'config/db.php';
 
-// ดึงหมวดหมู่
+
 $categories =$conn->query("SELECT * FROM categories")->fetchAll();
 
 // ดึงเมนูสินค้าทั้งหมด
@@ -40,7 +39,7 @@ $products = $conn->query($sql)->fetchAll();
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar ด้านซ้าย -->
+        
         <aside class="col-md-3 col-lg-2 sidebar p-4 d-flex flex-column justify-content-between">
             <div>
                 <div class="brand-title mb-4 d-flex align-items-center gap-2">
@@ -54,7 +53,7 @@ $products = $conn->query($sql)->fetchAll();
                 </div>
             </div>
 
-            <!-- ทางเข้าฝั่งพนักงาน -->
+            <!-- login ฝั่งพนักงาน -->
             <div class="pt-3 border-top" style="border-color: var(--cafe-border) !important;">
                 <a href="auth/login.php" class="nav-link-custom text-muted small px-0">
                     <i class="bi bi-shield-lock"></i> Staff Login
@@ -62,10 +61,10 @@ $products = $conn->query($sql)->fetchAll();
             </div>
         </aside>
 
-        <!-- โซนสั่งอาหารหลัก -->
+        <!-- สั่งอาหาร -->
         <main class="col-md-9 col-lg-10 p-4 p-md-5">
 
-            <!-- แถบค้นหา และข้อมูลสมาชิก/ตะกร้าสินค้า (มีแถวเดียว ไม่ซ้ำ) -->
+            
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
                 <div class="flex-grow-1" style="max-width: 450px;">
                     <div class="input-group">
@@ -105,7 +104,7 @@ $products = $conn->query($sql)->fetchAll();
             <h2 class="fw-normal mb-1">Coffee menu</h2>
             <p class="text-muted small mb-4">Select your favorite coffee, drinks, and bakery items.</p>
 
-            <!-- แถบปุ่มหมวดหมู่ (Pills) -->
+            <!-- แถบปุ่มหมวดหมู่ -->
             <div class="d-flex flex-wrap gap-2 mb-4" id="categoryPills">
                 <button type="button" class="category-pill active" data-category="">All</button>
                 <?php foreach ($categories as$cat): ?>
@@ -124,7 +123,7 @@ $products = $conn->query($sql)->fetchAll();
                              data-category="<?= htmlspecialchars($p['category_name'] ?? ''); ?>">
                             
                             <div class="card product-card shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
-                                <!-- ชื่อเมนูและราคา (ฟอนต์บาง) -->
+                                <!-- ชื่อเมนูและราคา -->
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h5 class="fw-normal mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
                                     <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
@@ -157,7 +156,6 @@ $products = $conn->query($sql)->fetchAll();
     </div>
 </div>
 
-<!-- เรียกใช้ Bootstrap, SweetAlert2 และ customer.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/customer.js"></script>

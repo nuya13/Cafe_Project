@@ -21,16 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // ตรวจสอบว่ามีผู้ใช้ และรหัสผ่านตรงกับ Hash หรือไม่
         if ($user && password_verify($password, $user['password'])) {
-            // ป้องกัน Session Fixation
             session_regenerate_id(true);
 
-            // บันทึกข้อมูลลงใน Session
+            
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['fullname'] = $user['fullname'];
             $_SESSION['role'] = $user['role'];
 
-            // ล็อกอินผ่าน พาไปหน้าแสดงรายการสินค้า
+            
             header("Location: ../products/index.php");
             exit();
         } else {
