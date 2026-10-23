@@ -3,9 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ตรวจสอบว่ามีการล็อกอินของลูกค้าแล้วหรือยัง
 if (!isset($_SESSION['customer_id'])) {
-    // ถ้ายังไม่ได้ล็อกอิน ให้เด้งกลับไปหน้าเข้าสู่ระบบ
     header("Location: customer_login.php");
     exit();
 }
@@ -14,13 +12,11 @@ require_once 'config/db.php';
 
 $categories = $conn->query("SELECT * FROM categories")->fetchAll();
 
-// ดึงเมนูสินค้าทั้งหมด
 $sql = "SELECT p.*, c.name AS category_name 
         FROM products p 
         LEFT JOIN categories c ON p.category_id = c.id 
         ORDER BY p.id DESC";
 $products = $conn->query($sql)->fetchAll();
-
 
 $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
 ?>
@@ -34,6 +30,28 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .product-img-container {
+            width: 100%;
+            height: 160px;
+            overflow: hidden;
+            background-color: #F8F1EB;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover .product-img-container img {
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
 
@@ -53,7 +71,6 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
                 </div>
             </div>
 
-            <!-- login ฝั่งพนักงาน -->
             <div class="pt-3 border-top" style="border-color: var(--cafe-border) !important;">
                 <a href="auth/login.php" class="nav-link-custom text-muted small px-0">
                     <i class="bi bi-shield-lock"></i> Staff Login
@@ -61,7 +78,6 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
             </div>
         </aside>
 
-        <!-- สั่งอาหาร -->
         <main class="col-md-9 col-lg-10 p-4 p-md-5">
 
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
@@ -75,13 +91,11 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
-                    <!-- ตะกร้าสินค้า: คลิกลิงก์เพื่อไปหน้า checkout.php -->
                     <a href="checkout.php" class="badge bg-white text-dark border p-2 px-3 rounded-pill shadow-sm d-flex align-items-center gap-2 text-decoration-none">
                         <i class="bi bi-cart3 fs-6" style="color: var(--cafe-primary) !important;"></i>
                         <span>Cart: <b id="cartCount" class="text-danger"><?= $cart_count; ?></b></span>
                     </a>
 
-                    <!-- สถานะลูกค้า -->
                     <?php if (!empty($_SESSION['customer_name'])): ?>
                         <div class="dropdown">
                             <button class="btn btn-white bg-white border rounded-pill px-3 py-2 small shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -99,11 +113,9 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
                 </div>
             </div>
 
-            <!-- หัวข้อเมนู -->
             <h2 class="fw-normal mb-1">Coffee menu</h2>
             <p class="text-muted small mb-4">Select your favorite coffee, drinks, and bakery items.</p>
 
-            <!-- แถบปุ่มหมวดหมู่ -->
             <div class="d-flex flex-wrap gap-2 mb-4" id="categoryPills">
                 <button type="button" class="category-pill active" data-category="">All</button>
                 <?php foreach ($categories as $cat): ?>
@@ -113,7 +125,6 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
                 <?php endforeach; ?>
             </div>
 
-            <!-- กล่องแสดงรายการเมนู -->
             <div class="row g-4" id="productGrid">
                 <?php if (count($products) > 0): ?>
                     <?php foreach ($products as $p): ?>
@@ -121,27 +132,42 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
                              data-name="<?= htmlspecialchars($p['name']); ?>" 
                              data-category="<?= htmlspecialchars($p['category_name'] ?? ''); ?>">
                             
-                            <div class="card product-card shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
-                                <!-- ชื่อเมนูและราคา -->
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="fw-normal mb-0 text-truncate me-2"><?= htmlspecialchars($p['name']); ?></h5>
-                                    <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
+                            <div class="card product-card shadow-sm h-100 d-flex flex-column justify-content-between border-0">
+                                
+                                <div class="product-img-container position-relative">
+    <?php if (!empty($p['image'])): ?>
+        <?php $img_src = (strpos($p['image'], 'http://') === 0 || strpos($p['image'], 'https://') === 0) ? $p['image'] : 'uploads/' . $p['image']; ?>
+        <!-- รูปหลัก -->
+        <img src="<?= htmlspecialchars($img_src); ?>" alt="<?= htmlspecialchars($p['name']); ?>" 
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        
+        <div class="text-muted fs-1 position-absolute top-50 start-50 translate-middle" style="display: none;">☕</div>
+    <?php else: ?>
+        <div class="text-muted fs-1">☕</div>
+    <?php endif; ?>
+</div>
+
+                                <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="fw-normal mb-0 text-truncate me-2" style="color: var(--cafe-text-dark);"><?= htmlspecialchars($p['name']); ?></h5>
+                                        <span class="product-price">฿<?= number_format($p['price'], 2); ?></span>
+                                    </div>
+
+                                    <div class="mt-auto pt-2">
+                                        <?php if ($p['stock'] > 0): ?>
+                                            <button onclick="addToSessionCart(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>', <?= $p['price']; ?>)" 
+                                                    class="btn w-100 text-white rounded-pill py-2 shadow-sm" 
+                                                    style="background-color: var(--cafe-primary); border: none; font-weight: 500;">
+                                                <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="btn w-100 btn-secondary rounded-pill py-2" disabled style="background-color: #a0938d; border: none; opacity: 0.85; font-weight: 400;">
+                                                Sold Out
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
 
-                                <!-- ปุ่มสั่งซื้อ หรือ แสดง Sold Out -->
-                                <div class="mt-auto pt-2">
-                                    <?php if ($p['stock'] > 0): ?>
-                                        <button onclick="addToSessionCart(<?= $p['id']; ?>, '<?= htmlspecialchars($p['name']); ?>', <?= $p['price']; ?>)" 
-                                                class="btn w-100 text-white rounded-pill py-2 shadow-sm" 
-                                                style="background-color: var(--cafe-primary); border: none; font-weight: 500;">
-                                            <i class="bi bi-cart-plus me-1"></i> Add to Cart
-                                        </button>
-                                    <?php else: ?>
-                                        <button class="btn w-100 btn-secondary rounded-pill py-2" disabled style="background-color: #a0938d; border: none; opacity: 0.85; font-weight: 400;">
-                                            Sold Out
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
                             </div>
 
                         </div>
@@ -158,7 +184,6 @@ $cart_count = isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0;
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- สคริปต์เชื่อมโยงปุ่ม Add to Cart ไปบันทึกใน Session ของเซิร์ฟเวอร์ -->
 <script>
 function addToSessionCart(productId, productName, productPrice) {
     let formData = new FormData();
