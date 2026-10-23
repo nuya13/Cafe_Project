@@ -117,3 +117,89 @@ body {
     font-weight: 500;
     font-size: 0.85rem;
 }
+
+.cafe-card-container {
+    background-color: var(--cafe-card);
+    border-radius: 24px;
+    border: 1px solid var(--cafe-border);
+    box-shadow: 0 10px 30px rgba(47, 36, 31, 0.05);
+}
+
+
+.receipt-header {
+    border-bottom: 2px dashed var(--cafe-border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+
+.table-cafe {
+    color: var(--cafe-text-dark);
+}
+
+.table-cafe th {
+    background-color: #F9EFE7 !important;
+    color: var(--cafe-text-dark);
+    font-weight: 600;
+    border-bottom: 1px solid var(--cafe-border);
+    padding: 12px 16px;
+}
+
+.table-cafe td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #F4E4D7;
+}
+
+
+.btn-cafe-primary {
+    background-color: var(--cafe-primary);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 24px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-cafe-primary:hover {
+    background-color: var(--cafe-primary-hover);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(217, 119, 69, 0.25);
+}
+
+
+.btn-cafe-outline {
+    background-color: transparent;
+    color: var(--cafe-text-dark);
+    border: 1px solid var(--cafe-border);
+    border-radius: 50px;
+    padding: 10px 24px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-cafe-outline:hover {
+    background-color: var(--cafe-sidebar);
+    color: var(--cafe-text-dark);
+    border-color: var(--cafe-text-muted);
+}
+
+
+.badge-cafe-paid {
+    background-color: #E2ECE9;
+    color: #2D6A4F;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-cafe-pending {
+    background-color: #FDF0ED;
+    color: var(--cafe-primary);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
